@@ -16,9 +16,12 @@
     "@langchain/groq": "^0.2.2",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+    "dotenv": "^16.5.0",
+    "langchain": "^0.3.24",
     "next": "15.3.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "serpapi": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

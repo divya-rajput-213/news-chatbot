@@ -10,7 +10,7 @@ export interface Article {
 
 // Define the type for the props
 export interface NewsCardProps {
-  news: Article[]; // Array of articles
+  news: string; // Array of articles
 }
 export interface SearchFormProps {
   query: string;

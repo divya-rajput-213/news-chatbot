@@ -15,11 +15,10 @@ import Head from "next/head";
 import NewsCard from "@/components/NewsCard";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
-import { Article } from "@/types/types";
 import SearchForm from "@/components/Search";
 
 const Home = () => {
-  const [news, setNews] = useState<Article[]>([]);
+  const [news, setNews] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -37,26 +36,33 @@ const Home = () => {
 
   const handleSearch = async (e: FormEvent<HTMLFormElement> | null) => {
     if (e) e.preventDefault();
-    const searchTerm =  query;
+    const searchTerm = query;
     if (!searchTerm.trim()) return;
   
     setSubmittedQuery(searchTerm);
     setQuery("");
+    setNews("");
     setIsEditing(false);
     setLoading(true);
     setError("");
+
   
     try {
       const url = `/api/news?query=${encodeURIComponent(searchTerm)}`;
       const res = await fetch(url);
       const data = await res.json();
-  
+        
       if (res.ok) {
-        // Ensure data.articles exists before setting the news
-        setNews(data.articles || []);
+        // Safely access content from API response
+        const content = data?.result?.content;
+        if (content) {
+          setNews(content); // Or however you want to structure/display it
+        } else {
+          setNews("");
+          setError("No news content returned.");
+        }
       } else {
-        // Handling errors returned from the server API
-        setError(data.error?.message || "Failed to fetch news.");
+        setError(data.error || "Failed to fetch news.");
       }
     } catch (err) {
       console.error("Error fetching news:", err);
@@ -65,6 +71,7 @@ const Home = () => {
       setLoading(false);
     }
   };
+  
   
   return (
     <>
