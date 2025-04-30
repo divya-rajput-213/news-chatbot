@@ -1,0 +1,129 @@
+/* styles/Home.module.css */
+.container {
+    min-height: 100vh;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f5f7fa;
+  }
+  
+  .main {
+    max-width: 900px;
+    width: 100%;
+    padding: 4rem 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .title {
+    margin: 0;
+    line-height: 1.15;
+    font-size: 3rem;
+    color: #2c3e50;
+    text-align: center;
+  }
+  
+  .description {
+    text-align: center;
+    line-height: 1.5;
+    font-size: 1.25rem;
+    color: #7f8c8d;
+    margin: 1rem 0 2rem;
+  }
+  
+  .form {
+    display: flex;
+    width: 100%;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .input {
+    flex-grow: 1;
+    padding: 1rem;
+    font-size: 1rem;
+    border: none;
+    outline: none;
+  }
+  
+  .button {
+    padding: 0 1.5rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  
+  .button:hover {
+    background-color: #2980b9;
+  }
+  
+  .button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  
+  .error {
+    width: 100%;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .response {
+    width: 100%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .response h2 {
+    color: #2c3e50;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-top: 0;
+  }
+  
+  .content {
+    line-height: 1.6;
+  }
+  
+  .content p {
+    margin-bottom: 1rem;
+  }
