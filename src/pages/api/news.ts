@@ -13,60 +13,51 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // Initialize SerpAPI tool (to fetch news-related data)
+    // 1. Initialize SerpAPI tool
     const serpTool = new SerpAPI(process.env.SERPAPI_API_KEY!);
 
-    // Initialize the Groq LLM (Chat model)
+    // 2. Initialize Groq LLM (Chat model)
     const llm = new ChatGroq({
       apiKey: process.env.GROQ_API_KEY!,
       model: "llama-3.3-70b-versatile",
       temperature: 0,
     });
 
-    // Create a strict news-related prompt template
+    // 3. Create prompt template
     const prompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        `You are an assistant that ONLY responds to news-related questions.
-        
-        If a user asks about:
-        - jokes
-        - stories
-        - personal help
-        - entertainment
-        - math
-        - programming
-        - weather
-        - or anything that is NOT news-related
-        
-        Then you must respond with: "Please ask a news-related question."
-
-        You should only answer questions that are clearly about:
-        - current events
-        - politics
-        - science
-        - technology
-        - global affairs
-        - sports
-        - world news
-        - headlines
-        
-        For any other topics, respond with "Please ask a news-related question."`,
+        `You are an assistant that ONLY answers questions related to news. 
+    
+        You must only respond to queries that are about the following:
+        - Current events
+        - Global affairs
+        - Politics
+        - Science
+        - Technology
+        - Sports
+        - Headlines
+    
+        If the user asks anything that is not news-related (e.g., jokes, programming help, personal queries, entertainment), you should reply with **exactly**:
+        "Please ask a news-related question."
+    
+        Do not provide any other responses, context, or assistance. Only respond to news-related inquiries and strictly follow this rule.`,
       ],
       ["placeholder", "{messages}"],
     ]);
+    
 
-    // Bind tools (SerpAPI to LLM) for actual news queries
+    // 4. Bind tools (SerpAPI to LLM)
     const llmWithTools = llm.bindTools([serpTool]);
 
-    // Create the chain for processing input and calling tools
+    // 5. Create chain for tool calls
     const chain = prompt.pipe(llmWithTools);
 
-    // Custom tool chain logic for invoking the assistant with the user input
+    // 6. Create custom tool chain logic
     const toolChain = RunnableLambda.from(async (userInput: string, config) => {
       const humanMessage = new HumanMessage(userInput);
 
-      // Get LLM response (may include tool calls for news-related answers)
+      // Get LLM response (e.g., tool calls or info)
       const aiMsg = await chain.invoke(
         {
           messages: [humanMessage],
@@ -74,12 +65,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         config
       );
 
-      // If tool calls are needed (i.e., fetching real news), handle with SerpAPI
+      // If tool calls are needed, run them with SerpAPI
       const toolMsgs = aiMsg.tool_calls && aiMsg.tool_calls.length > 0
         ? await serpTool.batch(aiMsg.tool_calls, config)
         : [];
 
-      // Final response from the assistant (including tool results)
+      // Final LLM response using both AI-generated response and tool results
       const finalResponse = await llm.invoke(
         [humanMessage, ...toolMsgs],
         config
@@ -88,12 +79,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return finalResponse;
     });
 
-    // Run the tool chain with the query input
+    // 7. Run tool chain with query input
     const toolChainResult = await toolChain.invoke(query);
 
-    // Extract and return relevant content (news-related response)
-    const { content } = toolChainResult;
+    // Extract useful info from the result
+    const {content } = toolChainResult;
 
+    // 8. Send the result back as JSON response
     res.status(200).json({
       result: {
         content,
