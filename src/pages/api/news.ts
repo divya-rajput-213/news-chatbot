@@ -13,37 +13,60 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // 1. Initialize SerpAPI tool
-    const serpTool = new SerpAPI(process.env.SERPAPI_API_KEY!, {
-      location: "United States",
-      hl: "en",
-      gl: "us",
-    });
+    // Initialize SerpAPI tool (to fetch news-related data)
+    const serpTool = new SerpAPI(process.env.SERPAPI_API_KEY!);
 
-    // 2. Initialize Groq LLM (Chat model)
+    // Initialize the Groq LLM (Chat model)
     const llm = new ChatGroq({
       apiKey: process.env.GROQ_API_KEY!,
       model: "llama-3.3-70b-versatile",
       temperature: 0,
     });
 
-    // 3. Create prompt template
+    // Create a strict news-related prompt template
     const prompt = ChatPromptTemplate.fromMessages([
-      ["system", "You are a helpful assistant."],
+      [
+        "system",
+        `You are an assistant that ONLY responds to news-related questions.
+        
+        If a user asks about:
+        - jokes
+        - stories
+        - personal help
+        - entertainment
+        - math
+        - programming
+        - weather
+        - or anything that is NOT news-related
+        
+        Then you must respond with: "Please ask a news-related question."
+
+        You should only answer questions that are clearly about:
+        - current events
+        - politics
+        - science
+        - technology
+        - global affairs
+        - sports
+        - world news
+        - headlines
+        
+        For any other topics, respond with "Please ask a news-related question."`,
+      ],
       ["placeholder", "{messages}"],
     ]);
 
-    // 4. Bind tools (SerpAPI to LLM)
+    // Bind tools (SerpAPI to LLM) for actual news queries
     const llmWithTools = llm.bindTools([serpTool]);
 
-    // 5. Create chain for tool calls
+    // Create the chain for processing input and calling tools
     const chain = prompt.pipe(llmWithTools);
 
-    // 6. Create custom tool chain logic
+    // Custom tool chain logic for invoking the assistant with the user input
     const toolChain = RunnableLambda.from(async (userInput: string, config) => {
       const humanMessage = new HumanMessage(userInput);
 
-      // Get LLM response (e.g., tool calls or info)
+      // Get LLM response (may include tool calls for news-related answers)
       const aiMsg = await chain.invoke(
         {
           messages: [humanMessage],
@@ -51,12 +74,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         config
       );
 
-      // If tool calls are needed, run them with SerpAPI
+      // If tool calls are needed (i.e., fetching real news), handle with SerpAPI
       const toolMsgs = aiMsg.tool_calls && aiMsg.tool_calls.length > 0
         ? await serpTool.batch(aiMsg.tool_calls, config)
         : [];
 
-      // Final LLM response using both AI-generated response and tool results
+      // Final response from the assistant (including tool results)
       const finalResponse = await llm.invoke(
         [humanMessage, ...toolMsgs],
         config
@@ -65,16 +88,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return finalResponse;
     });
 
-    // 7. Run tool chain with query input
+    // Run the tool chain with the query input
     const toolChainResult = await toolChain.invoke(query);
 
-    // Extract useful info from the result
-    const { tool_calls, content } = toolChainResult;
+    // Extract and return relevant content (news-related response)
+    const { content } = toolChainResult;
 
-    // 8. Send the result back as JSON response
     res.status(200).json({
       result: {
-        tool_calls,
         content,
       },
     });

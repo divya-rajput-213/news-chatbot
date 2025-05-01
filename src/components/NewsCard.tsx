@@ -1,5 +1,6 @@
 import React from "react";
 import { Typography, Box } from "@mui/material";
+import ReactMarkdown from "react-markdown";
 import { NewsCardProps } from "@/types/types";
 
 const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
@@ -15,7 +16,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
             wordBreak: "break-word",
           }}
         >
-          <Typography variant="body2">{news}</Typography>
+          <Typography variant="body2" component="div">
+            <ReactMarkdown>{news}</ReactMarkdown>
+          </Typography>
         </Box>
       </Box>
     </Box>
