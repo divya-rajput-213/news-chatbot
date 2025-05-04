@@ -14,7 +14,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     // 1. Initialize SerpAPI tool
-    const serpTool = new SerpAPI(process.env.SERPAPI_API_KEY!);
+    const serpTool = new SerpAPI(
+      // process.env.SERPAPI_API_KEY!
+    );
 
     // 2. Initialize Groq LLM (Chat model)
     const llm = new ChatGroq({
